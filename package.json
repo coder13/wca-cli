@@ -1,0 +1,28 @@
+{
+  "name": "wca-cli",
+  "version": "0.1.0",
+  "description": "CLI foundation for authenticating and talking to the World Cube Association API",
+  "bin": {
+    "wca-cli": "./index.ts"
+  },
+  "module": "index.ts",
+  "type": "module",
+  "files": [
+    "index.ts",
+    "src",
+    "skills",
+    "scripts",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "bun run index.ts",
+    "typecheck": "tsc --noEmit",
+    "install-skill": "./scripts/install-skill.sh"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
