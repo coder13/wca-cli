@@ -8,7 +8,7 @@ export function getInstalledSkillDirectory(): string {
 }
 
 export async function installSkill(): Promise<string> {
-  const source = fileURLToPath(new URL("../../skills/wca-cli/SKILL.md", import.meta.url));
+  const source = fileURLToPath(new URL("../../../skills/wca-cli/SKILL.md", import.meta.url));
   const targetDir = getInstalledSkillDirectory();
   const target = join(targetDir, "SKILL.md");
 

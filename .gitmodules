@@ -1,0 +1,6 @@
+[submodule "vendor/wcif"]
+	path = vendor/wcif
+	url = https://github.com/thewca/wcif.git
+[submodule "vendor/worldcubeassociation.org"]
+	path = vendor/worldcubeassociation.org
+	url = https://github.com/thewca/worldcubeassociation.org.git

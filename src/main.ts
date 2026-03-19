@@ -1,16 +1,20 @@
-import { CliError } from "./core/errors.ts";
-import { runCli } from "./cli/router.ts";
+import { runCli } from "./commands/index.ts";
+import { CliError } from "./lib/errors.ts";
+import { writeError } from "./lib/output.ts";
 
 export async function main(args: string[]): Promise<void> {
   try {
     await runCli(args);
   } catch (error) {
     if (error instanceof CliError) {
-      console.error(error.message);
+      writeError("CLI_ERROR", error.message);
       process.exit(error.exitCode);
     }
 
-    console.error(error);
+    writeError(
+      "UNEXPECTED_ERROR",
+      error instanceof Error ? error.message : String(error),
+    );
     process.exit(1);
   }
 }

@@ -1,13 +1,15 @@
 export const WCA_BASE_URL = "https://www.worldcubeassociation.org";
-export const DEFAULT_REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob";
+export const DEFAULT_REDIRECT_URI = "http://localhost:1339/callback";
+export const DEFAULT_OAUTH_SCOPES = "public email manage_competitions";
 
 export type AuthStrategy = "access-token" | "password" | "oauth-code";
 
 export interface StoredApp {
-  name: string;
+  baseUrl: string;
   clientId: string;
   clientSecret?: string;
   redirectUri: string;
+  scopes: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -20,9 +22,9 @@ export interface ProfileAuthConfig {
 
 export interface StoredProfile {
   name: string;
-  appName?: string;
   auth: ProfileAuthConfig;
   accessToken?: string;
+  refreshToken?: string;
   tokenType?: string;
   expiresAt?: string;
   createdAt: string;
@@ -31,8 +33,8 @@ export interface StoredProfile {
 
 export interface ConfigFile {
   version: 1;
+  app?: StoredApp;
   defaultProfileName?: string;
-  apps: Record<string, StoredApp>;
   profiles: Record<string, StoredProfile>;
 }
 

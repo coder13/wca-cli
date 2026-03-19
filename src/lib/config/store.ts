@@ -1,19 +1,18 @@
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { getAppDirectory, getConfigPath } from "./paths.ts";
-import type { ConfigFile, StoredApp, StoredProfile } from "../core/types.ts";
-import { CliError } from "../core/errors.ts";
+import { CliError } from "../errors.ts";
+import type { ConfigFile, StoredApp, StoredProfile } from "../types.ts";
 
 const DEFAULT_CONFIG: ConfigFile = {
   version: 1,
-  apps: {},
   profiles: {},
 };
 
 function cloneDefaultConfig(): ConfigFile {
   return {
     version: 1,
+    app: undefined,
     defaultProfileName: undefined,
-    apps: {},
     profiles: {},
   };
 }
@@ -30,12 +29,22 @@ export async function loadConfig(): Promise<ConfigFile> {
 
   try {
     const raw = await readFile(configPath, "utf8");
-    const parsed = JSON.parse(raw) as ConfigFile;
+    const parsed = JSON.parse(raw) as ConfigFile & {
+      app?: StoredApp;
+      apps?: Record<string, StoredApp>;
+      defaultAppName?: string;
+    };
+
+    // Backward compatibility for the earlier multi-app config shape.
+    const normalizedApp =
+      parsed.app ??
+      (parsed.defaultAppName ? parsed.apps?.[parsed.defaultAppName] : undefined) ??
+      Object.values(parsed.apps ?? {})[0];
 
     return {
       ...cloneDefaultConfig(),
       ...parsed,
-      apps: parsed.apps ?? {},
+      app: normalizedApp,
       profiles: parsed.profiles ?? {},
     };
   } catch (error) {
@@ -58,7 +67,7 @@ export async function saveConfig(config: ConfigFile): Promise<void> {
 
 export async function upsertApp(app: StoredApp): Promise<void> {
   const config = await loadConfig();
-  config.apps[app.name] = app;
+  config.app = app;
   await saveConfig(config);
 }
 
@@ -68,27 +77,40 @@ export async function upsertProfile(profile: StoredProfile): Promise<void> {
   await saveConfig(config);
 }
 
+export function findProfileKey(
+  config: Pick<ConfigFile, "profiles">,
+  profileRef: string,
+): string | undefined {
+  if (config.profiles[profileRef]) {
+    return profileRef;
+  }
+
+  return Object.entries(config.profiles).find(([, profile]) => profile.name === profileRef)?.[0];
+}
+
 export async function setDefaultProfile(profileName: string): Promise<void> {
   const config = await loadConfig();
+  const profileKey = findProfileKey(config, profileName);
 
-  if (!config.profiles[profileName]) {
+  if (!profileKey) {
     throw new CliError(`Unknown profile "${profileName}".`);
   }
 
-  config.defaultProfileName = profileName;
+  config.defaultProfileName = profileKey;
   await saveConfig(config);
 }
 
 export async function removeProfile(profileName: string): Promise<void> {
   const config = await loadConfig();
+  const profileKey = findProfileKey(config, profileName);
 
-  if (!config.profiles[profileName]) {
+  if (!profileKey) {
     throw new CliError(`Unknown profile "${profileName}".`);
   }
 
-  delete config.profiles[profileName];
+  delete config.profiles[profileKey];
 
-  if (config.defaultProfileName === profileName) {
+  if (config.defaultProfileName === profileKey) {
     const remaining = Object.keys(config.profiles).sort()[0];
     config.defaultProfileName = remaining;
   }
