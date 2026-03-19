@@ -1,5 +1,5 @@
 {
-  "name": "wca-cli",
+  "name": "@choover11/wca-cli",
   "version": "0.1.0",
   "description": "CLI foundation for authenticating and talking to the World Cube Association API",
   "license": "MIT",
@@ -25,6 +25,9 @@
   "type": "module",
   "engines": {
     "bun": ">=1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "files": [
     "index.ts",

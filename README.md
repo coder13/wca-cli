@@ -4,12 +4,12 @@ Strong base for a Bun-powered CLI that authenticates against the World Cube Asso
 
 ## Install
 
-`wca-cli` is published to npm, but it is a Bun-based CLI. Install Bun first, then install the package globally:
+`wca-cli` is published to npm as `@choover11/wca-cli`, but it is a Bun-based CLI. Install Bun first, then install the package globally:
 
 ```bash
-npm install -g wca-cli
+npm install -g @choover11/wca-cli
 # or
-bun add -g wca-cli
+bun add -g @choover11/wca-cli
 ```
 
 For local development in this repo:
