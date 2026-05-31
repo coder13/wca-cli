@@ -18,6 +18,8 @@ import type {
 
 export interface ManagedCompetitionsOptions {
   q?: string;
+  page?: number;
+  perPage?: number;
 }
 
 export interface PaymentTicketOptions {
@@ -55,14 +57,34 @@ export class WcaOauthClient {
     return requestJson("/api/v0/competitions/mine", this.options());
   }
 
-  async managedCompetitions(options: ManagedCompetitionsOptions = {}): Promise<CompetitionSummary[]> {
-    const params = new URLSearchParams({ managed_by_me: "true" });
+  async managedCompetitions(
+    options: ManagedCompetitionsOptions = {},
+  ): Promise<CompetitionSummary[]> {
+    // WCA API is paginated; fetch all pages by default.
+    const perPage = options.perPage ?? 100;
+    const startPage = options.page ?? 1;
 
-    if (options.q) {
-      params.set("q", options.q);
+    const all: CompetitionSummary[] = [];
+    for (let page = startPage; ; page++) {
+      const params = new URLSearchParams({
+        managed_by_me: "true",
+        page: String(page),
+        per_page: String(perPage),
+      });
+
+      if (options.q) {
+        params.set("q", options.q);
+      }
+
+      const batch = await requestJson<CompetitionSummary[]>(
+        `/api/v0/competitions?${params.toString()}`,
+        this.options(),
+      );
+      all.push(...batch);
+      if (batch.length < perPage) break;
     }
 
-    return requestJson(`/api/v0/competitions?${params.toString()}`, this.options());
+    return all;
   }
 
   async competitionWcif(competitionId: string): Promise<CompetitionWcif> {
